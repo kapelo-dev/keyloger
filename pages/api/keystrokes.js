@@ -10,11 +10,15 @@ export default async function handler(req, res) {
         console.log('Données reçues:', { timestamp, keystrokes });
         
         res.status(200).json({ 
+            success: true,
             message: 'Données reçues avec succès',
             data: { timestamp, keystrokes }
         });
     } catch (error) {
         console.error('Erreur:', error);
-        res.status(500).json({ message: 'Erreur lors du traitement de la requête' });
+        res.status(500).json({ 
+            success: false,
+            message: 'Erreur lors du traitement de la requête' 
+        });
     }
 } 

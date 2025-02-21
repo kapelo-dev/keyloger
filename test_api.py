@@ -6,12 +6,15 @@ def test_api():
     
     test_data = {
         "timestamp": datetime.now().isoformat(),
-        "keystrokes": "Test de l'API - Bonjour !"
+        "keystrokes": "Test de l'API - ça fonctionne !"
     }
     
     try:
+        print(f"Envoi de la requête à : {url}")
+        print(f"Données envoyées : {test_data}")
+        
         response = requests.post(url, json=test_data)
-        print(f"Code de statut: {response.status_code}")
+        print(f"\nCode de statut: {response.status_code}")
         print(f"Réponse: {response.json()}")
     except Exception as e:
         print(f"Erreur: {e}")
