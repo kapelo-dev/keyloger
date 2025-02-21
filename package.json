@@ -1,0 +1,12 @@
+{
+  "name": "mon-keylogger",
+  "version": "1.0.0",
+  "description": "Keylogger API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "mongodb": "^5.0.0"
+  }
+} 
