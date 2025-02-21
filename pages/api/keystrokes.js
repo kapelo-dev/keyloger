@@ -5,8 +5,6 @@ export default async function handler(req, res) {
 
     try {
         const { timestamp, keystrokes } = req.body;
-        
-        // Pour le moment, on va juste logger les données et renvoyer une réponse
         console.log('Données reçues:', { timestamp, keystrokes });
         
         res.status(200).json({ 
